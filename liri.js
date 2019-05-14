@@ -1,26 +1,29 @@
-//getting the keys for the.env file and keep secret//
+        //set variables with the .env pack//
 require("dotenv").config();
 
-
-    //creating the variable for the keys.js file contents / and all of the packages have been loaded//
+        //Spotify API and keys//
 var Spotify = require("node-spotify-api");
 var spotify = new Spotify(keys.spotify);
-    //for the OMBD API and Bands in Town APIs//
+var keys = require("./keys");
+
+        //for the OMBD API and Bands in Town APIs//
 var axios = require("axios");
-    //for formatting the dates for events//
+
+        //for formatting the dates for events//
 var moment = require("moment");
-var keys = require("./keys.js");
+
+        //Needed to read and wrtite text files//
 var fs = require("fs");
 
 
-    //Global - - - - user commands entered for Liri//
-var command = process.argv[2];
-    //just in case there are multiple words in the user search parameter//
+        //Global - - - - user commands entered for Liri//
+var userCommand= process.argv[2];
 var userInput = process.argv.slice[3].join(" ");
-    // console.log("userInput: " + userInput);
+    //console.log(userCommand);
+    //console.log(userInput);
 
 
-    switch (command) {
+    switch (userCommand) {
         case "spotify-this-song":
         getSpotify(userInput);
         break;
@@ -68,7 +71,7 @@ var userInput = process.argv.slice[3].join(" ");
         );
       }
     
-      
+      //---------------------Bands In Town Events begin here---------------------//
       function getBandsInTown(artist) {
         if (!artist) {
           console.log("You must enter Artist or Band name.");
@@ -94,7 +97,7 @@ var userInput = process.argv.slice[3].join(" ");
                 console.log("Venue : " + venue[i].venue.name);
                 console.log("Venue Location : " + venue[i].venue.city + "," + venue[i].venue.country);
                 console.log("Date of the Event : " + date.format("dddd, MMMM Do YYYY, h:mm:ss a"));
-                console.log("----------------------------------------------------------------");
+                console.log("================================================================");
               }
       
             }
@@ -102,4 +105,64 @@ var userInput = process.argv.slice[3].join(" ");
         }
       };
 
-    
+      //--------------------------------Movies begin here--------------------------//
+
+      function getMovie(movie) {
+        if (!movie) {
+          movie = "Mr. Nobody"; 
+          console.log("Mr. Nobody");
+        };
+      
+        var queryUrl = "http://www.omdbapi.com/?t=" + movie + "&y=&plot=short&apikey=trilogy";
+        //console.log(queryUrl);
+      
+        axios.get(queryUrl).then(
+          function output(response) {
+            if (!response.data.Title) {
+              console.log("Check your spelling");
+      
+            } else {
+              // console.log(response);
+              console.log("===================================================================")
+              console.log("Title of the movie: " + response.data.Title);
+              console.log("Release Year: " + response.data.Year);
+              console.log("IMDB Rating: " + response.data.imdbRating);
+              console.log(response.data.Ratings[1].Source + " Rating: " + response.data.Ratings[1].Value);
+              console.log("Origin Country: " + response.data.Country);
+              console.log("Language: " + response.data.Language);
+              console.log("Plot: " + response.data.Plot);
+              console.log("Actors: " + response.data.Actors);
+              console.log("===================================================================");
+            }
+          }
+        );
+      }
+
+      //-------------------------------Do What It Says here----------------------------//
+      function getRandom() {
+
+        fs.readFile("random.txt", "utf8", function (error, data) {
+      
+          // It will log the error to the console.
+          if (error) {
+            return console.log(error);
+          }
+          // Data here
+          //console.log(data);
+          var dataArr = data.split(",");
+          //console.log(dataArr);
+          //console.log(dataArr[0])
+          var newCommand = dataArr[0];
+          var newInput = dataArr[1];
+      
+          if (newCommand === "movie-this") {
+            movieThis(newInput);
+          }
+          if (newCommand === "concert-this") {
+            concertThis(newInput)
+          }
+          if (newCommand === "spotify-this-song") {
+            spotifyThis(newInput)
+          }
+        });
+      }
